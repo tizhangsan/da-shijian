@@ -3,6 +3,41 @@
     padding: 0;
 }
 body{
-    background-color: red;
-   background: url('./assets/images/login_bg.jpg');
+  background: url('/assets/images/login_bg.jpg'),no-repeat center;
+  background-size: cover;
+}
+.box{
+    width: 415px;
+    height: 315px;
+    background-color: #fff;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    
+}
+.box .box_title{
+    height: 60px;
+    background: url('/assets/images/login_title.png') no-repeat center;
+}
+.box .box_reg{
+    display: none;
+}
+.layui-form{
+    padding: 0 30px;
+ 
+}
+.right{
+    float: right;
+}
+.layui-form-item {
+    position: relative;
+}
+.layui-icon {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+}
+.layui-input {
+    padding-left: 32px;
 }
