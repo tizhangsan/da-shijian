@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/assets/lib/layui/css/layui.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            padding: 10px;
+
+        }
+
+        .layui-card {
+            background-color: rgb(14, 160, 239);
+        }
+
+        .layui-card-header {
+            font-size: 18px;
+        }
+
+        .layui-form {
+            width: 500px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layui-card">
+        <div class="layui-card-header">修改密码</div>
+        <div class="layui-card-body">
+            <!-- form -->
+            <form class="layui-form" action="">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">原密码</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="password" required lay-verify="required |pass " placeholder="请输入原密码"
+                            autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">现密码</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="password1" required lay-verify="required |pass|sm" placeholder="请输入现密码"
+                            autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <input id="ss" style="display: none;" type="text">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">确认密码</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="password2" required lay-verify="required |pass|smm" placeholder="确认密码"
+                            autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button id="but" class="layui-btn" lay-submit lay-filter="formDemo">确认修改</button>
+                        <button id="ww" type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script src="/assets/lib/layui/layui.all.js"></script>
+    <script src="/assets/lib/jquery.js"></script>
+    <script>
+
+        (function () {
+            //自定义校验规则
+            let form = layui.form
+            form.verify({
+                pass: [
+                    /^[\S]{6,12}$/
+                    , '密码必须6到12位,且不能出现空格'
+                ],
+                sm: function (value) {
+                    if (value === $('[name=password]').val()) return '密码一样修改个毛'
+                },
+                smm: function (value) {
+                    if (value !== $('[name=password1]').val()) return '2次密码不一致'
+                }
+
+            })
+            //submit 事件
+            let urll = 'http://www.liulongbin.top:3007'
+            $('.layui-form').on('submit', (e) => {
+                e.preventDefault()
+                $.ajax({
+                    method: 'POST',
+                    url: urll + '/my/updatepwd',
+                    headers: {
+                        Authorization: localStorage.getItem('token') || ''
+                    },
+                    data:{
+                        oldPwd:$('[name=password]').val(),newPwd:$('[name=password1]').val()
+                    },
+                    success:(res)=>{
+                        console.log(res);
+                        layer.msg(res.message)
+                        $('.layui-form')[0].reset()
+                    }
+                })
+            })
+        })();
+    </script>
+</body>
+
+</html>
