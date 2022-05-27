@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/assets/lib/layui/css/layui.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            padding: 10px;
+        }
+
+        .ws {
+            background-color: rgb(11, 231, 77);
+            float: right;
+            width: 60px;
+            height: 40px;
+            margin-right: 50px;
+
+        }
+
+        .layui-form {
+            padding: 20px 100px 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="layui-card">
+        <div class="layui-card-header">
+            <span>文章管理</span>
+            <button class="ws">添加类别</button>
+        </div>
+
+        <div class="layui-card-body">
+            <table class="layui-table">
+                <colgroup>
+                    <col>
+                    <col>
+                    <col width="200">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>分类名称</th>
+                        <th>分类别名</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="bd">
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <script src="/assets/lib/jquery.js"></script>
+    <script src="/assets/lib/layui/layui.all.js"></script>
+    <script>
+
+        let urll = 'http://www.liulongbin.top:3007'
+        ajaxs()
+
+
+
+
+        //封装 ajax
+        function ajaxs() {
+            $.ajax({
+                method: 'GET',
+                url: urll + '/my/article/cates',
+                headers: {
+                    Authorization: localStorage.getItem('token') || ''
+                },
+                success: function (res) {
+                    console.log(res);
+                    if (res.status !== 0) return layer.msg('请求失败')
+
+                    let num = [] //类型
+                    let numm = []//别名
+                    let idd = []
+                    $('#bd').empty()
+                    $.each(res.data, function (i, trim) {
+                        idd.push(trim.Id)
+                        numm.push(trim.alias)
+                        num.push(trim.name)
+                    
+                        $('#bd').append(`
+                        <tr>
+                        <td>${num[i]}</td>
+                        <td>${numm[i]}</td>
+                        <td> 
+                            <button class="but1" style="background-color: rgb(46, 241, 7); width: 40px; margin-left: 30px;" class="layui-btn layui-btn-xs" id="${idd[i]} " >编辑</button> 
+                            <button id="but2" style="background-color: red; width: 40px;" class="layui-btn layui-btn-xs  layui-border-red" data-id="${idd[i]}"> 删除</button>
+            
+                        </td>
+
+                    </tr>
+                        
+                        `)
+
+
+
+
+
+                    })
+
+                }
+            })
+        }
+
+        //点击事件
+        let index = null
+        let ind = null
+        $('.ws').click(() => {
+
+            index = layer.open({
+                type: 1,
+                area: ['500px', '260px'],
+                title: '添加文章分类',
+                content: $('#scr').html()
+            });
+
+        })
+            //添加文章分类
+        $('body').on('submit', '#ff', (e) => {
+            e.preventDefault()
+
+            $.ajax({
+                method: 'POST',
+                url: urll + '/my/article/addcates',
+                headers: {
+                    Authorization: localStorage.getItem('token') || ''
+                },
+                data: $('#ff').serialize(),
+                success: (res) => {
+                    console.log(res);
+                    if (res.status !== 0) return layer.msg('添加失败')
+
+                    ajaxs()
+                    layer.msg(res.message)
+                    layer.close(index);
+                }
+            })
+
+        })
+
+        $('#bd').on('click', '.but1', function () {
+
+            ind = layer.open({
+                type: 1,
+                area: ['500px', '260px'],
+                title: '编辑文章分类',
+                content: $('#scrip').html()
+            });
+
+            let id = $(this).attr("id")
+            console.log(id);
+            $.ajax({
+                method: 'GET',
+                url: urll + '/my/article/cates/' + id,
+
+                headers: {
+                    Authorization: localStorage.getItem('token') || ''
+                },
+                success: function (res) {
+                
+                    if (res.status !== 0) return lauer.msg('获取失败')
+                    $('[name=name1]').val(res.data.name)
+                    $('[name=alias1]').val(res.data.alias)
+                    $('[name=Id]').val(res.data.Id)
+                }
+            })
+        })
+        //编辑
+        $('body').on('submit', '#foo', function (e) {
+            e.preventDefault()
+            $.ajax({
+                method: 'POST',
+                url: urll + '/my/article/updatecate',
+                data: $('#foo').serialize(),
+                headers: {
+                    Authorization: localStorage.getItem('token') || ''
+                },
+                success: function (res) {
+             
+                    if (res.status !== 0) return layer.msg('失败')
+                    layer.msg(res.message)
+
+                    layer.close(ind);
+                    ajaxs()
+
+                }
+            })
+        })
+        //删除
+        $('#bd').on('click', '#but2', function (e) {
+            e.preventDefault()
+            let od = $(this).attr('data-id')
+            layer.confirm('确定删除吗', { icon: 3, title: '提示' }, function (index) {
+
+                $.ajax({
+                    method: 'GET',
+                    url: urll + '/my/article/deletecate/' + od,
+                    headers: {
+                        Authorization: localStorage.getItem('token') || ''
+                    },
+                    success:function(res){
+                  
+                        if(res.status!==0)return layer.msg('删除失败')
+                        layer.msg('删除成功')
+                        layer.close(index);
+                        ajaxs()
+                    }
+                })
+               
+            });
+           
+         
+
+        })
+
+
+    </script>
+    <script type="text/html" id="scr">
+        <form class="layui-form" id="ff" action="">
+            <div class="layui-form-item">
+              <label class="layui-form-label">分类名称</label>
+              <div class="layui-input-block">
+                <input type="text" name="name" required  lay-verify="required" placeholder="请输入分类名称" autocomplete="off" class="layui-input">
+              </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">分类别名</label>
+                <div class="layui-input-block">
+                  <input type="text" name="alias" required  lay-verify="required" placeholder="请输入分类别名" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                  <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                  <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+              </div>
+        </form> 
+    </script>
+    <script type="text/html" id="scrip">
+        <form id="foo" class="layui-form" action="">
+            <div class="layui-form-item">
+              <label class="layui-form-label">分类名称</label>
+              <div class="layui-input-block">
+                <input type="text" name="name" required  lay-verify="required" placeholder="请输入分类名称" autocomplete="off" class="layui-input">
+              </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">分类别名</label>
+                <div class="layui-input-block">
+                  <input type="text" name="alias" required  lay-verify="required" placeholder="请输入分类别名" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <input type="text" style="display: none;" name="Id">
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                  <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+               
+                </div>
+              </div>
+        </form> 
+    </script>
+</body>
+
+</html>
